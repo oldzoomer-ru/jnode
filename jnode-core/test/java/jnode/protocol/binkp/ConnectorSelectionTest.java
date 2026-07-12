@@ -26,8 +26,6 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 
-import jnode.protocol.binkp.connector.BinkpAsyncConnector;
-
 /**
  * Test to demonstrate connector selection logic
  */

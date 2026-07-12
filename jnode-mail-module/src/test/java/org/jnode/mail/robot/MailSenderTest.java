@@ -23,7 +23,6 @@ package org.jnode.mail.robot;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Hashtable;
 

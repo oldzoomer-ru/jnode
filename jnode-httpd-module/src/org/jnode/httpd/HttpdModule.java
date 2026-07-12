@@ -34,9 +34,6 @@ import org.jnode.httpd.routes.get.secure.*;
 import org.jnode.httpd.routes.post.*;
 import org.jnode.httpd.routes.post.secure.*;
 import org.jnode.httpd.util.HTML;
-import org.jnode.httpd.i18n.LocaleManager;
-import org.jnode.httpd.i18n.TranslationService;
-
 /**
  * HttpdModule - module listening to port and serving pages
  * 

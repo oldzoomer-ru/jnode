@@ -21,7 +21,6 @@
 package jnode.ftn.tosser;
 
 import jnode.dto.*;
-import jnode.ftn.FtnTools;
 import jnode.ftn.types.FtnAddress;
 import jnode.ftn.types.FtnMessage;
 import jnode.ftn.types.FtnPkt;
@@ -29,8 +28,6 @@ import jnode.main.MainHandler;
 import jnode.orm.ORMManager;
 import jnode.protocol.io.Message;
 import org.junit.jupiter.api.*;
-import com.j256.ormlite.table.TableUtils;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -20,7 +20,6 @@
 
 package org.jnode.httpd.routes.get;
 
-import org.jnode.httpd.util.HTML;
 import org.jnode.httpd.util.HTMLi18n;
 
 import io.javalin.http.Context;

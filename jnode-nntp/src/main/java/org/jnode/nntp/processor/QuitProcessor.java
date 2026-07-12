@@ -4,10 +4,7 @@ package org.jnode.nntp.processor;
 import org.jnode.nntp.Processor;
 import org.jnode.nntp.exception.EndOfSessionException;
 import org.jnode.nntp.model.Auth;
-import org.jnode.nntp.model.NntpResponse;
-
 import java.util.Collection;
-import java.util.Collections;
 
 public class QuitProcessor implements Processor {
 

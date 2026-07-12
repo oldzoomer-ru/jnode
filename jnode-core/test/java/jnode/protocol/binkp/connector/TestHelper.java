@@ -22,7 +22,6 @@ package jnode.protocol.binkp.connector;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import jnode.main.MainHandler;

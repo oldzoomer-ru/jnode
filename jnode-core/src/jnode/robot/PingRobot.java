@@ -22,12 +22,9 @@ package jnode.robot;
 
 import java.util.ArrayList;
 import java.util.List;
-import jnode.dto.Link;
-import jnode.dto.LinkOption;
 import jnode.ftn.FtnTools;
 import jnode.ftn.types.FtnMessage;
 import jnode.logger.Logger;
-import jnode.main.MainHandler;
 
 /**
  * PING Robot implementation according to FTSC specifications

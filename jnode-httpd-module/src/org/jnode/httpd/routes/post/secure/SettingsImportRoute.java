@@ -8,7 +8,6 @@ import org.jnode.httpd.service.SettingsExportImportService;
 import org.jnode.httpd.util.HTMLi18n;
 import jnode.logger.Logger;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**

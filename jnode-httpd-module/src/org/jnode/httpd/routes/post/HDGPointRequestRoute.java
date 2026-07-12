@@ -1,6 +1,5 @@
 package org.jnode.httpd.routes.post;
 
-import org.jnode.httpd.HttpdModule;
 import org.jnode.httpd.dto.PointRequest;
 
 import jnode.dto.Echoarea;

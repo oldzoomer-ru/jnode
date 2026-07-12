@@ -30,8 +30,6 @@ import jnode.orm.ORMManager;
 
 import org.jnode.httpd.util.HTMLi18n;
 import org.jnode.httpd.util.JSONUtil;
-import org.jnode.httpd.i18n.LocaleManager;
-
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 

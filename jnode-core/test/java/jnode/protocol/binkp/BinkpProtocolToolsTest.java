@@ -22,8 +22,6 @@ package jnode.protocol.binkp;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.NoSuchAlgorithmException;
-
 import org.junit.jupiter.api.Test;
 
 import jnode.dto.Link;

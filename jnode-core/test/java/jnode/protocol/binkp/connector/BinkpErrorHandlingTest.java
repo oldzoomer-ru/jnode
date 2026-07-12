@@ -23,8 +23,6 @@ package jnode.protocol.binkp.connector;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.BeforeAll;

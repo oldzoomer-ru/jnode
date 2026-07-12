@@ -30,8 +30,6 @@ import jnode.dto.Echoarea;
 import jnode.dto.Subscription;
 import jnode.orm.ORMManager;
 
-import com.j256.ormlite.dao.GenericRawResults;
-
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 

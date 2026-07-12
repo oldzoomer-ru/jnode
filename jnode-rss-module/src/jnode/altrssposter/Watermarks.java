@@ -25,7 +25,6 @@ import jnode.store.XMLSerializer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 

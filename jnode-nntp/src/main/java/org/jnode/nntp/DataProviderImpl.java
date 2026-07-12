@@ -17,8 +17,6 @@ import org.jnode.nntp.model.Auth;
 import org.jnode.nntp.model.NewsGroup;
 import org.jnode.nntp.model.NewsMessage;
 import com.j256.ormlite.dao.GenericRawResults;
-import com.j256.ormlite.field.DataType;
-
 import java.util.Collection;
 
 public class DataProviderImpl implements DataProvider {
