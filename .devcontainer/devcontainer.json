@@ -1,0 +1,16 @@
+{
+	"name": "Java",
+	"image": "mcr.microsoft.com/devcontainers/java:25-trixie",
+
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:4": {
+			"moby": false,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"installDockerComposeSwitch": true,
+			"iptablesSwitchAtRuntime": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "latest"
+		}
+	}
+}
