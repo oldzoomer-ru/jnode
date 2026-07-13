@@ -1,0 +1,84 @@
+# jNode FTN Node - Docker Compose Configuration
+# FTN (FidoNet) mailer, tosser, and tracker system
+# https://github.com/oldzoomer-ru/jnode
+
+services:
+  # ============================================================
+  # jNode - Main FTN Node Application
+  # ============================================================
+  jnode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jnode:latest
+    container_name: jnode
+    restart: unless-stopped
+    ports:
+      # BinkP protocol port - FTN bundle exchange (2:9999/9999)
+      - "24554:24554"
+      # HTTPD module - Web interface
+      - "8080:8080"
+    volumes:
+      # Configuration files (bind mount from host)
+      - ./docs/configs:/app/jnode/etc
+      # Database storage (H2 by default)
+      - jnode-db:/app/jnode/db
+      # Logs
+      - jnode-log:/app/jnode/log
+      # Incoming files from other nodes
+      - jnode-inbound:/app/jnode/inbound
+      # Nodelist
+      - jnode-nodelist:/app/jnode/nodelist
+      # Temporary files
+      - jnode-tmp:/app/jnode/tmp
+      # File echos
+      - jnode-files:/app/jnode/files
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx512m -server -Djava.awt.headless=true -Dfile.encoding=UTF-8
+      - TZ=UTC
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - jnode-network
+
+  # ============================================================
+  # PostgreSQL - Optional database
+  # ============================================================
+  postgres:
+    image: postgres:18-alpine
+    container_name: jnode-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jnode
+      POSTGRES_USER: jnode
+      POSTGRES_PASSWORD: jnode
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      - jnode-network
+
+volumes:
+  jnode-db:
+    driver: local
+  jnode-log:
+    driver: local
+  jnode-inbound:
+    driver: local
+  jnode-nodelist:
+    driver: local
+  jnode-tmp:
+    driver: local
+  jnode-files:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  jnode-network:
+    driver: bridge
