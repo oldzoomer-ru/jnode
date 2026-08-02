@@ -93,7 +93,7 @@ docker compose ps
 
 ### Main Configuration Files
 
-Located in `jnode-etc` volume:
+Located in `docs/config/`:
 
 1. **jnode.conf** - Main node configuration
    - Node name, address, location
@@ -109,37 +109,6 @@ Located in `jnode-etc` volume:
 3. **mail_module.conf** - Email module
    - SMTP settings
    - From address
-
-### Example jnode.conf
-
-```
-# Node's name
-info.stationname = My FTN Node
-
-# Node's location
-info.location = Moscow, Russia
-
-# Sysop name
-info.sysop = Ivan Sysop
-
-# Node's FTN address
-info.address = 2:5020/1234
-
-# JDBC URL (H2)
-jdbc.url = jdbc:h2:/app/jnode/etc/jnode
-jdbc.user = jnode
-jdbc.pass = jnode
-
-# BinkP settings
-binkp.server = true
-binkp.client = true
-binkp.bind = 0.0.0.0
-binkp.port = 24554
-binkp.inbound = /app/jnode/inbound
-
-# Modules
-modules = org.jnode.httpd.HttpdModule:/app/jnode/etc/httpd_module.conf,org.jnode.mail.MailModule:/app/jnode/etc/mail_module.conf
-```
 
 ## Management Commands
 
@@ -235,11 +204,3 @@ docker compose logs jnode | grep httpd
 # Test locally
 curl http://localhost:8080/
 ```
-
-## Security Notes
-
-1. Change default database passwords
-2. Use strong passwords for SMTP and XMPP
-3. Consider binding HTTPD to 127.0.0.1 if not exposing publicly
-4. Keep jNode updated to latest version
-5. Regularly backup database and configuration
