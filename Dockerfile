@@ -38,7 +38,7 @@ COPY linux/ linux/
 COPY windows/ windows/
 COPY LICENSE NOTICE ./
 
-RUN mvn -pl jnode-assembly -Pall -DskipTests package -B
+RUN mvn clean package -P stable
 
 # Runtime stage
 FROM eclipse-temurin:25-jre-resolute
