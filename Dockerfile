@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build stage
-FROM eclipse-temurin:25-jdk-resolute AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /workspace
 RUN apt-get update && apt-get install -y --no-install-recommends maven git unzip ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -53,7 +53,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends unzip ca-certif
 
 WORKDIR /app/jnode
 
-# Ensure logs and inbound directories are writable
-RUN mkdir -p log inbound tmp db files && chmod -R 777 log inbound tmp db files
-
-ENTRYPOINT ["java", "-cp", "lib/*:jnode.jar", "jnode.main.Main", "etc/jnode.cfg"]
+ENTRYPOINT ["java", "-cp", "lib/*", "jnode.main.Main", "etc/jnode.cfg"]
