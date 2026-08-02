@@ -53,4 +53,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends unzip ca-certif
 
 WORKDIR /app/jnode
 
-ENTRYPOINT ["java", "-cp", "lib/*", "jnode.main.Main", "etc/jnode.cfg"]
+ENTRYPOINT java -cp "/app/jnode/lib/*" jnode.main.Main etc/jnode.cfg
+
