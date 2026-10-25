@@ -1,11 +1,42 @@
+# Build outputs
 **/target
+**/*.class
+**/*.jar
+
+# Version control
 **/.git
-!/.git
-**/*.log
-**/*.tmp
-**/*.bak
-**/.DS_Store
+**/.gitignore
+
+# IDE
 **/.idea
 **/.vscode
 **/*.iml
-**/*~
+**/.project
+**/.settings
+**/.classpath
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+**/*.tmp
+**/*.bak
+
+# Documentation (not needed in build context)
+**/README*
+**/LICENSE
+**/NOTICE
+
+# Dev/CI configs
+**/.travis.yml
+**/.github
+**/.devcontainer
+**/*.md
+
+# Veai
+**/.veai
+
+# Docker files (avoid recursive context)
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore

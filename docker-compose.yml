@@ -2,22 +2,41 @@
 # FTN (FidoNet) mailer, tosser, and tracker system
 # https://github.com/oldzoomer-ru/jnode
 
+x-jnode-defaults: &jnode-defaults
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: '2.0'
+        memory: 1G
+      reservations:
+        cpus: '0.5'
+        memory: 256M
+  healthcheck:
+    test: [ "CMD-SHELL", "curl -f http://localhost:8080/ || nc -z localhost 24554 || exit 1" ]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 60s
+  networks:
+    - jnode-network
+
 services:
   # ============================================================
   # jNode - Main FTN Node Application
   # ============================================================
   jnode:
+    <<: *jnode-defaults
     build:
       context: .
       dockerfile: Dockerfile
     image: jnode:latest
     container_name: jnode
-    restart: unless-stopped
     ports:
       # BinkP protocol port - FTN bundle exchange (2:9999/9999)
-      - "24554:24554"
+      - "${BINKP_PORT:-24554}:24554"
       # HTTPD module - Web interface
-      - "8080:8080"
+      - "${HTTPD_PORT:-8080}:8080"
     volumes:
       # Configuration files (bind mount from host)
       - ./docs/configs:/app/jnode/etc
@@ -33,35 +52,92 @@ services:
       - jnode-tmp:/app/jnode/tmp
       # File echos
       - jnode-files:/app/jnode/files
+      # Troubleshooting packets
+      - jnode-troubleshooting:/app/jnode/troubleshooting
     environment:
-      - JAVA_OPTS=-Xms128m -Xmx512m -server -Djava.awt.headless=true -Dfile.encoding=UTF-8
-      - TZ=UTC
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    networks:
-      - jnode-network
+      - JAVA_OPTS=-Xms${JNODE_XMS:-128m} -Xmx${JNODE_XMX:-512m} -server -Djava.awt.headless=true -Dfile.encoding=${JNODE_ENCODING:-UTF-8}
+      - TZ=${TZ:-UTC}
+      - JNODE_XMS=${JNODE_XMS:-128m}
+      - JNODE_XMX=${JNODE_XMX:-512m}
+      - JNODE_OPTS=${JNODE_OPTS:-}
 
   # ============================================================
   # PostgreSQL - Optional database
+  # Profile: postgres
   # ============================================================
   postgres:
+    <<: *jnode-defaults
     image: postgres:18-alpine
     container_name: jnode-postgres
-    restart: unless-stopped
     environment:
-      POSTGRES_DB: jnode
-      POSTGRES_USER: jnode
-      POSTGRES_PASSWORD: jnode
+      POSTGRES_DB: ${POSTGRES_DB:-jnode}
+      POSTGRES_USER: ${POSTGRES_USER:-jnode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jnode}
     volumes:
-      - postgres-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     networks:
       - jnode-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jnode} -d ${POSTGRES_DB:-jnode}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    profiles:
+      - postgres
+
+  # ============================================================
+  # MySQL - Optional database
+  # Profile: mysql
+  # ============================================================
+  mysql:
+    <<: *jnode-defaults
+    image: mysql:9.1
+    container_name: jnode-mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jnode}
+      MYSQL_USER: ${MYSQL_USER:-jnode}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jnode}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-jnode_root}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - jnode-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-jnode_root}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - mysql
+
+  # ============================================================
+  # H2 Console - Database admin web interface
+  # Profile: h2-console
+  # ============================================================
+  h2-console:
+    <<: *jnode-defaults
+    image: eclipse-temurin:25-jre-noble
+    container_name: jnode-h2-console
+    ports:
+      - "${H2_CONSOLE_PORT:-9092}:9092"
+    volumes:
+      - jnode-db:/app/db
+    command: >
+      sh -c "
+        apt-get update && apt-get install -y --no-install-recommends curl && \
+        curl -o /tmp/h2.tar.gz https://github.com/h2database/h2database/releases/download/v2.3.232/h2-2024-05-28.tar.gz && \
+        mkdir -p /opt/h2 && cd /opt/h2 && tar xzf /tmp/h2.tar.gz && \
+        java -cp /opt/h2/bin/h2*.jar org.h2.tools.Console -web -webAllowOthers -baseDir /app/db &
+        while true; do sleep 1; done
+      "
+    profiles:
+      - h2-console
 
 volumes:
   jnode-db:
@@ -76,7 +152,11 @@ volumes:
     driver: local
   jnode-files:
     driver: local
+  jnode-troubleshooting:
+    driver: local
   postgres-data:
+    driver: local
+  mysql-data:
     driver: local
 
 networks:

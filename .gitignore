@@ -18,3 +18,5 @@ fts-5003.001
 .vscode/settings.json
 __pycache__/
 .DS_Store
+
+.veai/

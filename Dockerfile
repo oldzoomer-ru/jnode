@@ -1,57 +1,85 @@
 # syntax=docker/dockerfile:1
 
+# ============================================================
 # Build stage
+# ============================================================
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /workspace
-RUN apt-get update && apt-get install -y --no-install-recommends git unzip ca-certificates \
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
+
+# Copy Maven POMs first for better layer caching
 COPY pom.xml .
 COPY jnode-core/pom.xml jnode-core/
 COPY jnode-httpd-module/pom.xml jnode-httpd-module/
 COPY jnode-mail-module/pom.xml jnode-mail-module/
-COPY jnode-rss-module/pom.xml jnode-rss-module/
-COPY jnode-dumb-module/pom.xml jnode-dumb-module/
-COPY jnode-xmpp-module/pom.xml jnode-xmpp-module/
-COPY jnode-pointchecker-module/pom.xml jnode-pointchecker-module/
-COPY jnode-nntp/pom.xml jnode-nntp/
-COPY jnode-telegram-channel-poster/pom.xml jnode-telegram-channel-poster/
 COPY jnode-assembly/pom.xml jnode-assembly/
-COPY jnode-assembly/distribution-dev.xml jnode-assembly/
 COPY jnode-assembly/distribution-stable.xml jnode-assembly/
-COPY .git .git
 
-# Copy source
+# Resolve dependencies (cached unless pom.xml changes)
+RUN mvn dependency:go-offline -Pstable -q
+
+# Copy remaining module POMs
+COPY jnode-httpd-module/pom.xml jnode-httpd-module/
+COPY jnode-mail-module/pom.xml jnode-mail-module/
+
+# Copy source code
 COPY jnode-core/ jnode-core/
 COPY jnode-httpd-module/ jnode-httpd-module/
 COPY jnode-mail-module/ jnode-mail-module/
-COPY jnode-rss-module/ jnode-rss-module/
-COPY jnode-dumb-module/ jnode-dumb-module/
-COPY jnode-xmpp-module/ jnode-xmpp-module/
-COPY jnode-pointchecker-module/ jnode-pointchecker-module/
-COPY jnode-nntp/ jnode-nntp/
-COPY jnode-telegram-channel-poster/ jnode-telegram-channel-poster/
-COPY docs/ docs/
-COPY jdbc-drivers/ jdbc-drivers/
-COPY linux/ linux/
-COPY windows/ windows/
-COPY LICENSE NOTICE ./
+COPY jnode-assembly/ jnode-assembly/
 
-RUN mvn clean package -P stable
+# Build the distribution
+RUN mvn clean package -Pstable -q
 
+# ============================================================
 # Runtime stage
-FROM eclipse-temurin:25-jre-resolute
+# ============================================================
+FROM eclipse-temurin:25-jre-noble
 WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    unzip \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && addgroup --system jnode \
+    && adduser --system --ingroup jnode jnode
 
 # Copy assembled distribution from the build stage
 COPY --from=build /workspace/jnode-assembly/target/*.zip /app/
 
-RUN apt-get update && apt-get install -y --no-install-recommends unzip ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && unzip /app/*.zip -d /app && rm /app/*.zip
+# Extract and clean up
+RUN unzip -q /app/*.zip -d /app && rm /app/*.zip
+
+# Create required directories and set permissions
+RUN mkdir -p /app/jnode/{inbound,db,log,tmp,nodelist,files,troubleshooting} \
+    && chown -R jnode:jnode /app/jnode
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/jnode/docker-entrypoint.sh
+RUN chmod +x /app/jnode/docker-entrypoint.sh \
+    && chown jnode:jnode /app/jnode/docker-entrypoint.sh
 
 WORKDIR /app/jnode
 
-ENTRYPOINT java -cp "/app/jnode/lib/*" jnode.main.Main etc/jnode.cfg
+# Switch to non-root user
+USER jnode
 
+# Expose ports
+EXPOSE 24554
+EXPOSE 8080
+
+# Health check (tests both BinkP and HTTPD)
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
+    CMD curl -f http://localhost:8080/ || nc -z localhost 24554 || exit 1
+
+ENTRYPOINT ["/app/jnode/docker-entrypoint.sh"]
