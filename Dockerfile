@@ -42,17 +42,16 @@ RUN mvn clean package -Pstable -q
 # ============================================================
 # Runtime stage
 # ============================================================
-FROM eclipse-temurin:25-jre-noble
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     unzip \
     curl \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && addgroup --system jnode \
-    && adduser --system --ingroup jnode jnode
+    && addgroup -S jnode \
+    && adduser -S -G jnode jnode
 
 # Copy assembled distribution from the build stage
 COPY --from=build /workspace/jnode-assembly/target/*.zip /app/
